@@ -1,6 +1,10 @@
 package com.example.userapp.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
@@ -8,11 +12,18 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotEmpty
     private String name;
-    @Column(name = "lastname")
-    private String lastName;
+    @NotEmpty
+    private String lastname;
+    @NotEmpty
+    @Email
     private String email;
+    @NotEmpty
+    @Size(min = 6, max = 20)
     private String username;
+    @NotBlank
+    private String password;
 
     public String getUsername() {
         return username;
@@ -21,8 +32,6 @@ public class User {
     public void setUsername(String username) {
         this.username = username;
     }
-
-    private String password;
 
     public Long getId() {
         return id;
@@ -40,12 +49,12 @@ public class User {
         this.name = name;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getLastname() {
+        return lastname;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
     }
 
     public String getEmail() {
