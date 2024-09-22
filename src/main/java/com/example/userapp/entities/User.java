@@ -1,10 +1,14 @@
 package com.example.userapp.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -24,6 +28,24 @@ public class User {
     private String username;
     @NotBlank
     private String password;
+
+    @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
+    @ManyToMany()
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = {@JoinColumn(name = "user_id")},
+        inverseJoinColumns = @JoinColumn(name="role_id"),
+        uniqueConstraints = { @UniqueConstraint(columnNames = {"user_id", "role_id"})}
+    )
+    private List<Role> roles;
+
+    public User(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    public User() {
+
+    }
 
     public String getUsername() {
         return username;
@@ -71,5 +93,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 }
