@@ -1,6 +1,7 @@
 package com.example.userapp.controller;
 
 import com.example.userapp.entities.User;
+import com.example.userapp.models.UserRequest;
 import com.example.userapp.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class UserController {
 
     @GetMapping("/page/{page}")
     public Page<User> getPage(@PathVariable Integer page) {
-        Pageable pageable = PageRequest.of(page, 2);
+        Pageable pageable = PageRequest.of(page, 3);
         return userService.findAll(pageable);
     }
 
@@ -44,20 +45,14 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id,@Valid @RequestBody User user, BindingResult bindingResult) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UserRequest user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()){
             return validation(bindingResult);
         }
 
-        Optional<User> userOptional = userService.findById(id);
+        Optional<User> userOptional = userService.update(user,id);
         if(userOptional.isPresent()) {
-            User updatedUser = userOptional.get();
-            updatedUser.setName(user.getName());
-            updatedUser.setLastname(user.getLastname());
-            updatedUser.setEmail(user.getEmail());
-            updatedUser.setPassword(user.getPassword());
-            updatedUser.setUsername(user.getUsername());
-            return ResponseEntity.ok(userService.save(updatedUser));
+            return ResponseEntity.ok(userOptional.orElseThrow());
         }
         return ResponseEntity.notFound().build();
     }

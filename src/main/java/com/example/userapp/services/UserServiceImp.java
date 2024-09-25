@@ -1,11 +1,14 @@
 package com.example.userapp.services;
 
 import com.example.userapp.entities.User;
+import com.example.userapp.models.UserRequest;
 import com.example.userapp.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +19,11 @@ import java.util.Optional;
 public class UserServiceImp implements UserService {
     private final UserRepository userRepository;
 
-    public UserServiceImp(UserRepository userRepository) {
+    private PasswordEncoder passwordEncoder;
+
+    public UserServiceImp(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -41,7 +47,23 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public User save(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
+    }
+
+    @Transactional
+    @Override
+    public Optional<User> update(UserRequest user, Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isPresent()) {
+            User updatedUser = userOptional.get();
+            updatedUser.setName(user.getName());
+            updatedUser.setLastname(user.getLastname());
+            updatedUser.setEmail(user.getEmail());
+            updatedUser.setUsername(user.getUsername());
+            return Optional.of(userRepository.save(updatedUser));
+        }
+        return Optional.empty();
     }
 
     @Transactional
