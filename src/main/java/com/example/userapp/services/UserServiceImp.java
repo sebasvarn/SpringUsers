@@ -1,28 +1,32 @@
 package com.example.userapp.services;
 
+import com.example.userapp.entities.Role;
 import com.example.userapp.entities.User;
 import com.example.userapp.models.UserRequest;
+import com.example.userapp.repositories.RoleRepository;
 import com.example.userapp.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserServiceImp implements UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
-    private PasswordEncoder passwordEncoder;
 
-    public UserServiceImp(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    private final PasswordEncoder passwordEncoder;
+
+    public UserServiceImp(UserRepository userRepository, RoleRepository rolRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        ;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -47,6 +51,16 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public User save(User user) {
+
+        List<Role> roles = new ArrayList<>();
+        Optional<Role> roleUser = this.roleRepository.findByName("ROLE_USER");
+        roleUser.ifPresent(roles::add);
+
+        if(user.isAdmin()){
+            Optional<Role> roleAdmin = this.roleRepository.findByName("ROLE_ADMIN");
+            roleAdmin.ifPresent(roles::add);
+        }
+        user.setRoles(roles);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -61,9 +75,31 @@ public class UserServiceImp implements UserService {
             updatedUser.setLastname(user.getLastname());
             updatedUser.setEmail(user.getEmail());
             updatedUser.setUsername(user.getUsername());
+
+            List<Role> roles = new ArrayList<>();
+
+
+            if(updatedUser.isAdmin()){
+                Optional<Role> roleAdmin = this.roleRepository.findByName("ROLE_ADMIN");
+                roleAdmin.ifPresent(roles::add);
+            }
+            updatedUser.setRoles(roles);
+
             return Optional.of(userRepository.save(updatedUser));
         }
         return Optional.empty();
+    }
+
+    private void getRoles(User updatedUser) {
+        List<Role> roles = new ArrayList<>();
+        Optional<Role> roleUser = this.roleRepository.findByName("ROLE_USER");
+        roleUser.ifPresent(roles::add);
+
+        if(updatedUser.isAdmin()){
+            Optional<Role> roleAdmin = this.roleRepository.findByName("ROLE_ADMIN");
+            roleAdmin.ifPresent(roles::add);
+        }
+        updatedUser.setRoles(roles);
     }
 
     @Transactional
