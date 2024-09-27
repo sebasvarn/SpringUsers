@@ -1,5 +1,6 @@
 package com.example.userapp.entities;
 
+import com.example.userapp.models.IUser;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements IUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

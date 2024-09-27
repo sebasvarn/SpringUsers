@@ -1,5 +1,6 @@
 package com.example.userapp.services;
 
+import com.example.userapp.entities.Role;
 import com.example.userapp.entities.User;
 import com.example.userapp.models.UserRequest;
 import org.springframework.data.domain.Page;
@@ -16,5 +17,4 @@ public interface UserService {
     User save(User user);
     Optional<User> update(UserRequest user, Long id);
     void deleteById(Long id);
-
 }

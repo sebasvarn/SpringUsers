@@ -36,4 +36,5 @@ public class Role {
     public void setName(@NotBlank String name) {
         this.name = name;
     }
+
 }

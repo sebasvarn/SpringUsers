@@ -2,6 +2,7 @@ package com.example.userapp.services;
 
 import com.example.userapp.entities.Role;
 import com.example.userapp.entities.User;
+import com.example.userapp.models.IUser;
 import com.example.userapp.models.UserRequest;
 import com.example.userapp.repositories.RoleRepository;
 import com.example.userapp.repositories.UserRepository;
@@ -52,15 +53,8 @@ public class UserServiceImp implements UserService {
     @Override
     public User save(User user) {
 
-        List<Role> roles = new ArrayList<>();
-        Optional<Role> roleUser = this.roleRepository.findByName("ROLE_USER");
-        roleUser.ifPresent(roles::add);
+        user.setRoles(getRoles(user));
 
-        if(user.isAdmin()){
-            Optional<Role> roleAdmin = this.roleRepository.findByName("ROLE_ADMIN");
-            roleAdmin.ifPresent(roles::add);
-        }
-        user.setRoles(roles);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -76,21 +70,14 @@ public class UserServiceImp implements UserService {
             updatedUser.setEmail(user.getEmail());
             updatedUser.setUsername(user.getUsername());
 
-            List<Role> roles = new ArrayList<>();
-
-
-            if(updatedUser.isAdmin()){
-                Optional<Role> roleAdmin = this.roleRepository.findByName("ROLE_ADMIN");
-                roleAdmin.ifPresent(roles::add);
-            }
-            updatedUser.setRoles(roles);
+            updatedUser.setRoles(getRoles(user));
 
             return Optional.of(userRepository.save(updatedUser));
         }
         return Optional.empty();
     }
 
-    private void getRoles(User updatedUser) {
+    private List<Role> getRoles(IUser updatedUser) {
         List<Role> roles = new ArrayList<>();
         Optional<Role> roleUser = this.roleRepository.findByName("ROLE_USER");
         roleUser.ifPresent(roles::add);
@@ -99,8 +86,12 @@ public class UserServiceImp implements UserService {
             Optional<Role> roleAdmin = this.roleRepository.findByName("ROLE_ADMIN");
             roleAdmin.ifPresent(roles::add);
         }
-        updatedUser.setRoles(roles);
+        return roles;
+
     }
+
+
+
 
     @Transactional
     @Override

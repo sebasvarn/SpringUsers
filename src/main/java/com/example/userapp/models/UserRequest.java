@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
-public class UserRequest {
+public class UserRequest implements IUser{
 
     @NotEmpty
     private String name;
@@ -17,6 +17,8 @@ public class UserRequest {
     @NotEmpty
     @Size(min = 6, max = 20)
     private String username;
+
+    private Boolean admin;
 
     public String getEmail() {
         return email;
@@ -48,5 +50,14 @@ public class UserRequest {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        this.admin = admin;
     }
 }
