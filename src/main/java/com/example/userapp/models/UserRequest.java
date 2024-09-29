@@ -1,7 +1,6 @@
 package com.example.userapp.models;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
@@ -18,7 +17,7 @@ public class UserRequest implements IUser{
     @Size(min = 6, max = 20)
     private String username;
 
-    private Boolean admin;
+    private boolean admin;
 
     public String getEmail() {
         return email;
@@ -52,12 +51,12 @@ public class UserRequest implements IUser{
         this.username = username;
     }
 
+    public void setAdmin(Boolean admin) {
+        this.admin = admin;
+    }
+
     @Override
     public boolean isAdmin() {
         return admin;
-    }
-
-    public void setAdmin(Boolean admin) {
-        this.admin = admin;
     }
 }
