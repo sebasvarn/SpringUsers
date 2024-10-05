@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImp implements UserService {
@@ -27,20 +28,27 @@ public class UserServiceImp implements UserService {
     public UserServiceImp(UserRepository userRepository, RoleRepository rolRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        ;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
     @Override
     public Page<User> findAll(Pageable pageable) {
-        return this.userRepository.findAll(pageable);
+        return this.userRepository.findAll(pageable).map(user -> {
+            boolean admin = user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()));
+            user.setAdmin(admin);
+            return user;
+        });
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<User> findAll() {
-        return (List<User>) userRepository.findAll();
+        return ((List<User>) userRepository.findAll()).stream().map(user -> {
+            boolean admin = user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()));
+            user.setAdmin(admin);
+            return user;
+        }).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

@@ -31,6 +31,7 @@ public class User implements IUser {
     @NotBlank
     private String password;
 
+    @Override
     public boolean isAdmin() {
         return admin;
     }
@@ -40,8 +41,8 @@ public class User implements IUser {
     }
 
     @Transient
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private boolean admin = false;
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private boolean admin;
 
     @JsonIgnoreProperties({"handler", "hibernateLazyInitializer"})
     @ManyToMany()
