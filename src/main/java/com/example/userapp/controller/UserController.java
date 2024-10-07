@@ -2,15 +2,18 @@ package com.example.userapp.controller;
 
 import com.example.userapp.entities.User;
 import com.example.userapp.models.UserRequest;
+import com.example.userapp.repositories.UserRepository;
 import com.example.userapp.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +26,8 @@ import java.util.Optional;
 public class UserController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/page/{page}")
     public Page<User> getPage(@PathVariable Integer page) {
@@ -75,6 +80,16 @@ public class UserController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> upload(@Valid @RequestParam("file") MultipartFile file, @RequestParam Long id) {
+        Optional<User> userOptional = userService.findById(id);
+        if(userOptional.isPresent()) {
+            User user = userOptional.get();
+            userService.uploadPicture(file, user);
+        }
+        return ResponseEntity.ok().build();
     }
 
     public ResponseEntity<Map<String, String>> validation(BindingResult bindingResult) {

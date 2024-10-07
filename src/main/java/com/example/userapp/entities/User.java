@@ -31,6 +31,8 @@ public class User implements IUser {
     @NotBlank
     private String password;
 
+    private String photo;
+
     @Override
     public boolean isAdmin() {
         return admin;
@@ -116,5 +118,13 @@ public class User implements IUser {
 
     public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 }

@@ -11,7 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -84,6 +89,28 @@ public class UserServiceImp implements UserService {
         }
         return Optional.empty();
     }
+
+    @Transactional
+    @Override
+    public void uploadPicture(MultipartFile file, User user) {
+        if (!file.isEmpty()) {
+            String fileName = file.getOriginalFilename();
+            Path pathFile = Paths.get("uploads").resolve(fileName).toAbsolutePath();
+
+            try {
+                Files.copy(file.getInputStream(), pathFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            user.setPhoto(fileName);
+            userRepository.save(user);
+        }else {
+            throw new RuntimeException("File is empty");
+        }
+
+    }
+
 
     private List<Role> getRoles(IUser updatedUser) {
         List<Role> roles = new ArrayList<>();

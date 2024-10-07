@@ -50,6 +50,7 @@ public class SpringSecurityConfig {
                          .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
                          .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasRole("ADMIN")
                          .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasRole("ADMIN")
+                         .requestMatchers(HttpMethod.POST, "api/users/upload").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated())
                     .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                     .addFilter(new JwtAuthenticationFilter(authenticationManager()))
