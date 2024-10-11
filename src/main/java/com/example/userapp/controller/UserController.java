@@ -5,20 +5,29 @@ import com.example.userapp.models.UserRequest;
 import com.example.userapp.repositories.UserRepository;
 import com.example.userapp.services.UserService;
 import jakarta.validation.Valid;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @CrossOrigin(origins = {"http://localhost:4200"})
 @RestController
@@ -28,6 +37,8 @@ public class UserController {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
+
+
 
     @GetMapping("/page/{page}")
     public Page<User> getPage(@PathVariable Integer page) {
@@ -69,8 +80,9 @@ public class UserController {
         }
         User userCreated = userService.save(user);
         return ResponseEntity.ok(userCreated);
-
     }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
@@ -81,6 +93,22 @@ public class UserController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/upload/img/{photo:.+}")
+    public ResponseEntity<Resource> showPhoto(@PathVariable String photo) throws MalformedURLException {
+        Path pathFile = Paths.get("uploads").resolve(photo).toAbsolutePath();
+        Resource resource = null;
+
+        resource = new UrlResource(pathFile.toUri());
+
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new RuntimeException("Could not read file: " + pathFile);
+        }
+        HttpHeaders header = new HttpHeaders();
+        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"");
+        return new ResponseEntity<Resource>(resource, HttpStatus.OK);
+    }
+
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> upload(@Valid @RequestParam("file") MultipartFile file, @RequestParam Long id) {

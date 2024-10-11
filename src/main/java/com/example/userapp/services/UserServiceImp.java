@@ -6,6 +6,7 @@ import com.example.userapp.models.IUser;
 import com.example.userapp.models.UserRequest;
 import com.example.userapp.repositories.RoleRepository;
 import com.example.userapp.repositories.UserRepository;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +22,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -94,8 +98,10 @@ public class UserServiceImp implements UserService {
     @Override
     public void uploadPicture(MultipartFile file, User user) {
         if (!file.isEmpty()) {
-            String fileName = file.getOriginalFilename();
-            Path pathFile = Paths.get("uploads").resolve(fileName).toAbsolutePath();
+
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename().replace(" ","");
+            Path uploads = Paths.get("uploads");
+            Path pathFile = uploads.resolve(fileName).toAbsolutePath();
 
             try {
                 Files.copy(file.getInputStream(), pathFile);
@@ -103,12 +109,26 @@ public class UserServiceImp implements UserService {
                 throw new RuntimeException(e);
             }
 
-            user.setPhoto(fileName);
+            String lastPhoto = user.getPhoto();
+
+            deletePhoto(lastPhoto);
+
             userRepository.save(user);
         }else {
             throw new RuntimeException("File is empty");
         }
 
+    }
+
+    private void deletePhoto(String photo) {
+        if (photo != null && !photo.isEmpty()) {
+            Path pathLastPhoto =
+                    Paths.get("uploads").resolve(photo).toAbsolutePath();
+            File fileLastPhoto = pathLastPhoto.toFile();
+            if (fileLastPhoto.exists() && fileLastPhoto.canRead()) {
+                fileLastPhoto.delete();
+            }
+        }
     }
 
 
@@ -127,11 +147,16 @@ public class UserServiceImp implements UserService {
 
 
 
-
     @Transactional
     @Override
     public void deleteById(Long id) {
+        Optional<User> userOptional = findById(id);
+        if (userOptional.isPresent()){
+            User user = userOptional.get();
+            deletePhoto(user.getPhoto());
+        }
         userRepository.deleteById(id);
+
     }
 
 }
