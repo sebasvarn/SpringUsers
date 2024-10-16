@@ -97,9 +97,8 @@ public class UserController {
     @GetMapping("/upload/img/{photo:.+}")
     public ResponseEntity<Resource> showPhoto(@PathVariable String photo) throws MalformedURLException {
         Path pathFile = Paths.get("uploads").resolve(photo).toAbsolutePath();
-        Resource resource = null;
 
-        resource = new UrlResource(pathFile.toUri());
+        Resource resource = new UrlResource(pathFile.toUri());
 
         if (!resource.exists() || !resource.isReadable()) {
             throw new RuntimeException("Could not read file: " + pathFile);
@@ -111,13 +110,15 @@ public class UserController {
 
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> upload(@Valid @RequestParam("file") MultipartFile file, @RequestParam Long id) {
+    public ResponseEntity<User> upload(@Valid @RequestParam("file") MultipartFile file, @RequestParam Long id) {
         Optional<User> userOptional = userService.findById(id);
         if(userOptional.isPresent()) {
             User user = userOptional.get();
             userService.uploadPicture(file, user);
+            return ResponseEntity.ok(user); // Return the updated user object
+        } else {
+            return ResponseEntity.notFound().build(); // Handle user not found case
         }
-        return ResponseEntity.ok().build();
     }
 
     public ResponseEntity<Map<String, String>> validation(BindingResult bindingResult) {

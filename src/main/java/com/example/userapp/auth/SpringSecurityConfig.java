@@ -44,14 +44,14 @@ public class SpringSecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) {
         try {
-            return http.authorizeHttpRequests(authz ->
-                 authz.requestMatchers(HttpMethod.GET, "/api/users", "api/users/page/{page}", "api/users/{id}").permitAll()
+            return http.authorizeHttpRequests(authz -> authz
+                            .requestMatchers(HttpMethod.GET, "/api/users", "api/users/page/{page}", "api/users/{id}").permitAll()
                          .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("USER", "ADMIN")
                          .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
                          .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasRole("ADMIN")
                          .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasRole("ADMIN")
-                         .requestMatchers(HttpMethod.POST, "api/users/upload").hasAnyRole("USER", "ADMIN")
-                         .requestMatchers(HttpMethod.GET, "/upload/img/{photo:.+}").hasAnyRole("USER", "ADMIN")
+                         .requestMatchers(HttpMethod.POST, "/api/users/upload").hasAnyRole("USER", "ADMIN")
+                         .requestMatchers(HttpMethod.GET, "/api/users/upload/img/**").permitAll()
                         .anyRequest().authenticated())
                     .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                     .addFilter(new JwtAuthenticationFilter(authenticationManager()))

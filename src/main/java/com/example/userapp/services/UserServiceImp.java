@@ -73,6 +73,7 @@ public class UserServiceImp implements UserService {
         user.setRoles(getRoles(user));
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         return userRepository.save(user);
     }
 
@@ -94,22 +95,22 @@ public class UserServiceImp implements UserService {
         return Optional.empty();
     }
 
-    @Transactional
-    @Override
     public void uploadPicture(MultipartFile file, User user) {
         if (!file.isEmpty()) {
-
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename().replace(" ","");
+            // Generate a unique filename
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename().replace(" ", "");
             Path uploads = Paths.get("uploads");
             Path pathFile = uploads.resolve(fileName).toAbsolutePath();
 
             try {
+                // Copy the file to the specified location
                 Files.copy(file.getInputStream(), pathFile);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
             String lastPhoto = user.getPhoto();
+            user.setPhoto(fileName);
 
             deletePhoto(lastPhoto);
 
@@ -117,7 +118,6 @@ public class UserServiceImp implements UserService {
         }else {
             throw new RuntimeException("File is empty");
         }
-
     }
 
     private void deletePhoto(String photo) {
